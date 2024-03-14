@@ -1,0 +1,110 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import plotly.express as px
+
+df = pd.read_csv("C:\\Users\\Vaishnavi\\OneDrive\\Desktop\\Unemployment in India.csv")
+df.head()
+print(df.info())
+
+# Remove extra spaces from column names
+df.columns = df.columns.str.strip()
+# Print the cleaned column names
+print(df.columns)
+
+print("Number of missing values in each column:")
+print(df.isnull().sum())
+
+categorical_column_names = ['Region', 'Date', 'Frequency', 'Area']
+for col in categorical_column_names:
+    df[col] = df[col].fillna(df[col].mode()[0])
+
+numerical_column_names = ['Estimated Unemployment Rate (%)', 'Estimated Employed', 'Estimated Labour Participation Rate (%)']
+for col in numerical_column_names:
+    df[col] = df[col].fillna(df[col].mean())
+
+print("Number of missing values after handling:")
+print(df.isnull().sum())
+
+plt.figure(figsize=(20, 12))
+sns.countplot(x='Region', data=df, palette='viridis')
+plt.title('Distribution of Region')
+plt.xlabel('Region')
+plt.ylabel('Count')
+plt.xticks(rotation=45)
+plt.show()
+
+plt.figure(figsize=(8, 6))
+sns.histplot(df['Frequency'], bins=20, kde=True, color='skyblue')
+plt.title('Distribution of Frequency')
+plt.xlabel('Frequency')
+plt.ylabel('Count')
+plt.show()
+
+plt.figure(figsize=(12, 6))
+sns.lineplot(x='Date', y='Estimated Unemployment Rate (%)', data=df, marker='o')
+plt.title('Estimated Unemployment Rate (%) Over Time')
+plt.xlabel('Date')
+plt.ylabel('Estimated Unemployment Rate (%)')
+plt.xticks(rotation=45)
+plt.show()
+
+area_measure = df['Area'].value_counts()
+plt.figure(figsize=(8, 8))
+plt.pie(area_measure, labels=area_measure.index, autopct='%1.1f%%', startangle=140)
+plt.title('Distribution of Area')
+plt.axis('equal')
+plt.show()
+
+for col in numerical_column_names:
+    plt.figure(figsize=(8, 6))
+    sns.histplot(df[col], kde=True, color='skyblue')
+    plt.title(f'Distribution of {col}')
+    plt.xlabel(col)
+    plt.ylabel('Frequency')
+    plt.show()
+
+sns.pairplot(df)
+plt.title('Pairplot of Numerical Variables')
+plt.show()
+
+plt.figure(figsize=(20, 12))
+sns.boxplot(x='Region', y='Estimated Employed', data=df)
+plt.title('Estimated Employed by Region')
+plt.xlabel('Region')
+plt.ylabel('Estimated Employed')
+plt.xticks(rotation=45)
+plt.show()
+
+# Identify categorical columns
+categorical_columns = df.select_dtypes(include=['object']).columns
+
+# One-hot encode categorical columns
+encoded_dataframe = pd.get_dummies(df, columns=categorical_columns)
+
+# Calculate correlation matrix
+matrix_correlation = encoded_dataframe.corr()
+
+# Plot correlation matrix
+plt.figure(figsize=(25, 20))
+sns.heatmap(matrix_correlation, annot=True, cmap='coolwarm', fmt=".2f")
+plt.title('Correlation Matrix')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='Estimated Employed', y='Estimated Unemployment Rate (%)', hue='Region', data=df)
+plt.title('Unemployment Rate vs. Employed (Colored by Region)')
+plt.xlabel('Estimated Employed')
+plt.ylabel('Estimated Unemployment Rate (%)')
+plt.legend(title='Region', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.show()
+
+plt.figure(figsize=(12, 6))
+sns.lineplot(x='Date', y='Estimated Unemployment Rate (%)', data=df)
+plt.title('Trend of Unemployment Rate over Time')
+plt.xlabel('Date')
+plt.ylabel('Estimated Unemployment Rate (%)')
+plt.xticks(rotation=45)
+plt.show()
+
